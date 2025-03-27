@@ -29,7 +29,11 @@
 
 | Algorithm  | Run Time | Results |
 | --- | --- | --- |
+| exact_F0   |          |         | 
+| BJKST      |          |         |
+
+| Algorithm  | Run Time | Results |
+| --- | --- | --- |
 | exact_F2   |          |         | 
 | Tug_of_War |          |         |
-| BJKST      |          |         |
 
