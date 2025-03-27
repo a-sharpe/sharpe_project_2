@@ -117,29 +117,32 @@ object main{
     // Broadcast the matrix so each worker can use the same hash functions
     val broadcastHashFuncs = x.sparkContext.broadcast(hashFuncs)
 
+    // First, compute the frequency for each distinct string
+    val frequencies = x.map(s => (s, 1L)).reduceByKey(_ + _)
+
     val zero = Array.fill[Long](totalSketches)(0L)
 
-    // Aggregate the contributions for each sketch
-    val sketchSums: Array[Long] = x.aggregate(zero)(
-    // For each string, update each entry in the accumulator with the corresponding hash value
-    (acc, s) => {
-      val funcs = broadcastHashFuncs.value
-      var idx = 0
-      for (d <- 0 until depth; w <- 0 until width) {
-        acc(idx) += funcs(d)(w)(s)
-        idx += 1
+    // For each distinct s and its frequency f, update all sketches by adding f * h(s)
+    val sketchSums: Array[Long] = frequencies.aggregate(zero)(
+      (acc, kv) => {
+        val (s, f) = kv
+        val funcs = broadcastHashFuncs.value
+        var idx = 0
+        for (d <- 0 until depth; w <- 0 until width) {
+          // Multiply the frequency by the fixed hash value.
+          acc(idx) += f * funcs(d)(w)(s)
+          idx += 1
+        }
+        acc
+      },
+      (acc1, acc2) => {
+        for (i <- 0 until totalSketches) {
+          acc1(i) += acc2(i)
+         }
+        acc1
       }
-      acc
-    },
-    // Merge two accumulators
-    (acc1, acc2) => {
-      for (i <- 0 until totalSketches) {
-        acc1(i) += acc2(i)
-      }
-      acc1
-     }
     )
-
+    
     // Square each sketch's sum to get an unbiased estimator for F2
     val squaredSketches = sketchSums.map(sum => sum * sum)
 
@@ -194,13 +197,13 @@ object main{
         println("Usage: project_2 input_path BJKST #buckets trials")
         sys.exit(1)
       }
-   //   val ans = BJKST(dfrdd, args(2).toInt, args(3).toInt)
+      val ans = BJKST(dfrdd, args(2).toInt, args(3).toInt)
 
       val endTimeMillis = System.currentTimeMillis()
       val durationSeconds = (endTimeMillis - startTimeMillis) / 1000
 
       println("==================================")
-     // println("BJKST Algorithm. Bucket Size:"+ args(2) + ". Trials:" + args(3) +". Time elapsed:" + durationSeconds + "s. Estimate: "+ans)
+      println("BJKST Algorithm. Bucket Size:"+ args(2) + ". Trials:" + args(3) +". Time elapsed:" + durationSeconds + "s. Estimate: "+ans)
       println("==================================")
     }
     else if(args(1)=="tidemark") {
