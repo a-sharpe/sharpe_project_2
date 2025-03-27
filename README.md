@@ -14,9 +14,9 @@ The local results for Parts 1 and 2 were computed using the Apple M2 Pro chip. F
 
 # Part 2: Tug_of_War Function
 
-- Local Results (for some reason this took an extremely long time, more than 30 minutes, which I believe led to the discrepancy between these results and the GCP):
-  - Time Elapsed: > 1800 sec 
-  - Estimate: 
+- Local Results:
+  - Time Elapsed: 907 sec 
+  - Estimate: 9397081282
     
 - GCP Results (1 driver, 4 machines w/ 2x N1 cores):
   - Time Elapsed: 203 sec 
