@@ -16,11 +16,11 @@ The local results for Parts 1 and 2 were computed using the Apple M2 Pro chip. F
 
 - Local Results (for some reason this took an extremely long time, more than 30 minutes, which I believe led to the discrepancy between these results and the GCP):
   - Time Elapsed: > 1800 sec 
-  - Estimate: 21464343
+  - Estimate: 
     
 - GCP Results (1 driver, 4 machines w/ 2x N1 cores):
-  - Time Elapsed: 275 sec 
-  - Estimate: 42790292
+  - Time Elapsed: 203 sec 
+  - Estimate: 8342440577
 
 # Part 3: BJKST Function
 
@@ -41,10 +41,10 @@ We then compared the respective algorithms using the GCP results.
 | exact_F0   |          |         | 
 | BJKST      |          |         |
 
-Due to the variance induced by the Tug of War Algorithm, the answer does not match the exact F2 exactly. Additionally, due to the the computational overhead of computing with 10x3 sketches, the time it takes does not actually improve over the brute force, exact method.
+Due to the variance induced by the Tug of War Algorithm, the answer does not match the exact F2 exactly (97% accurate). Additionally, due to the the computational overhead of computing with 10x3 sketches, the time it takes does not actually improve over the brute force, exact method. However, if we reduce the number of sketches, Tug of War will be faster, albeit less accurate.
 
 | Algorithm  | Run Time (sec) | Results |
 | --- | --- | --- |
 | exact_F2   |   74       |   8567966130   | 
-| Tug_of_War |  275     | 42790292  |
+| Tug_of_War |  203     | 8342440577  |
 
