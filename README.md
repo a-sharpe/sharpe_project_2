@@ -41,6 +41,8 @@ We then compared the respective algorithms using the GCP results.
 | exact_F0   |          |         | 
 | BJKST      |          |         |
 
+Due to the variance induced by the Tug of War Algorithm, the answer does not match the exact F2 exactly. Additionally, due to the the computational overhead of computing with 10x3 sketches, the time it takes does not actually improve over the brute force, exact method.
+
 | Algorithm  | Run Time (sec) | Results |
 | --- | --- | --- |
 | exact_F2   |   74       |   8567966130   | 
