@@ -30,9 +30,19 @@ The local results for Parts 1 and 2 were computed using the Apple M2 Pro chip. F
     
 - GCP Results (1 driver, 4 machines w/ 2x N1 cores):
   - Time Elapsed:
+  - Estimate:
+
+# Part 4: exact_F0
+
+- Local Results:
+  - Time Elapsed:
+  - Estimate:
+    
+- GCP Results (1 driver, 4 machines w/ 2x N1 cores):
+  - Time Elapsed:
   - Estimate: 
 
-# Part 4: Comparison
+# Part 5: Comparison
 
 We then compared the respective algorithms using the GCP results. 
 
