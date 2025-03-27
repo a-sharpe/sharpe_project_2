@@ -106,24 +106,22 @@ object main{
 
 
   def Tug_of_War(x: RDD[String], width: Int, depth:Int) : Long = {
-    // Total number of sketches
+   
     val totalSketches = width * depth
 
-    // Create a matrix of hash functions: depth rows and width columns.
-    // Each entry is a function: String => Int, that returns either 1 or -1.
+    // Create a matrix of hash functions: depth rows and width columns
     val hashFuncs: Array[Array[String => Long]] = Array.tabulate(depth, width) { (d, w) =>
     new four_universal_Radamacher_hash_function().hash(_: String)
     }
 
-    // Broadcast the matrix so each worker can use the same hash functions.
+    // Broadcast the matrix so each worker can use the same hash functions
     val broadcastHashFuncs = x.sparkContext.broadcast(hashFuncs)
 
-    // Zero value: an array of Long of length totalSketches, all initialized to 0.
     val zero = Array.fill[Long](totalSketches)(0L)
 
-    // Aggregate the contributions for each sketch.
+    // Aggregate the contributions for each sketch
     val sketchSums: Array[Long] = x.aggregate(zero)(
-    // For each string, update each entry in the accumulator with the corresponding hash value.
+    // For each string, update each entry in the accumulator with the corresponding hash value
     (acc, s) => {
       val funcs = broadcastHashFuncs.value
       var idx = 0
@@ -133,7 +131,7 @@ object main{
       }
       acc
     },
-    // Merge two accumulators by element-wise summing.
+    // Merge two accumulators
     (acc1, acc2) => {
       for (i <- 0 until totalSketches) {
         acc1(i) += acc2(i)
@@ -142,41 +140,38 @@ object main{
      }
     )
 
-    // Square each sketch's sum to get an unbiased estimator for F2.
+    // Square each sketch's sum to get an unbiased estimator for F2
     val squaredSketches = sketchSums.map(sum => sum * sum)
 
-    // For each depth row (group of width sketches), compute the mean of the squared values.
+    // For each depth row, compute the mean of the squared values
     val rowMeans: Array[Double] = Array.tabulate(depth) { d =>
     val row = squaredSketches.slice(d * width, d * width + width)
     row.sum.toDouble / width
     }
 
-    // Compute the median of the depth means.
+    // Compute the median of the depth means
     val sortedMeans = rowMeans.sorted
     val median: Double = if (depth % 2 == 1) {
     sortedMeans(depth / 2)
-  } else {
+    } else {
     (sortedMeans(depth / 2 - 1) + sortedMeans(depth / 2)) / 2.0
-  }
-
-    // Return the median as a Long approximation to F2.
+    }
     median.toLong
-  }
+    }
 
-
+  
   def exact_F0(x: RDD[String]) : Long = {
     val ans = x.distinct.count
     return ans
   }
 
-
+  
   def exact_F2(x: RDD[String]) : Long = {
     // map each plate to a tuple with count 1, then sum them by plate
     // then map each plate count to its square, then add the squares
     val ans = x.map(i => (i,1L)).reduceByKey(_+_).map {case (_,count) => count*count}.reduce(_+_)
     return ans
   }
-
 
 
   def main(args: Array[String]) {
