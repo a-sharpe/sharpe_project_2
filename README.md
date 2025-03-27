@@ -16,7 +16,7 @@ The local results for Parts 1 and 2 were computed using the Apple M2 Pro chip. F
 - Local Results:
   - Time Elapsed: 9624 sec 
   - Estimate: 21464343
-- GCP Results (1 driver, 4 machines w/ 2x N4 cores):
+- GCP Results (1 driver, 4 machines w/ 2x N1 cores):
   - Time Elapsed:
   - Estimate: 
 
@@ -25,7 +25,7 @@ The local results for Parts 1 and 2 were computed using the Apple M2 Pro chip. F
 - Local Results:
   - Time Elapsed:
   - Estimate: 
-- GCP Results (1 driver, 4 machines w/ 2x N4 cores):
+- GCP Results (1 driver, 4 machines w/ 2x N1 cores):
   - Time Elapsed:
   - Estimate: 
 
