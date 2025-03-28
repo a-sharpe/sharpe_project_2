@@ -71,12 +71,12 @@ object main{
 
     // Add an element using the provided hash function.
     def add(s: String, h: hash_function): Unit = {
-      val r = h.hash(s).toDouble / h.p.toDouble  // Normalize to [0,1).
+      val r = h.hash(s).toDouble / h.p.toDouble  
       // Insert r and keep only the smallest bucketSize values.
       minSet = (r :: minSet).sorted.take(bucketSize)
     }
 
-    // Merge with another sketch.
+
     def merge(that: BJKSTSketch): BJKSTSketch = {
       val merged = new BJKSTSketch(bucketSize)
       merged.minSet = (this.minSet ++ that.minSet).sorted.take(bucketSize)
