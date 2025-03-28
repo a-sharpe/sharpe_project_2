@@ -29,17 +29,17 @@ The local results for Parts 1 and 2 were computed using the Apple M2 Pro chip. F
   - Estimate: 4.0647854525584167
     
 - GCP Results (1 driver, 4 machines w/ 2x N1 cores):
-  - Time Elapsed: it runned for more than 30 minutes
-  - Estimate: 
+  - Time Elapsed: 338s
+  - Estimate: 4.349122446706388E7 with 20000 trial
 
 # Part 5: Comparison
 
-We then compared the respective algorithms using the GCP results. 
+We then compared the respective algorithms using the GCP results. our BJKST sketch estimate of 43.49 million is inaccurate compared to the true distinct count of 7.41 million — it overshoots by nearly 487%, outside of the ±20%  range. This deviation indicates that the sketch’s bucket size (width) is far too small to capture enough of the low‑hash values or the implemenation was not done correctly.
 
 | Algorithm  | Run Time (sec) | Results |
 | --- | --- | --- |
 | exact_F0   |    28   |  7406649| 
-| BJKST      |        |  4.0647854525584167   |
+| BJKST      |   338  |  4.349122446706388E7   |
 
 Due to the variance induced by the Tug of War Algorithm, the answer does not match the exact F2 exactly (97% accurate). Additionally, due to the the computational overhead of computing with 10x3 sketches, the time it takes does not actually improve over the brute force, exact method. However, if we reduce the number of sketches, Tug of War will be faster, albeit less accurate.
 
