@@ -64,71 +64,53 @@ object main{
     }
   }
 
- class BJKSTSketch(val bucketSize: Int) extends Serializable {
-  var minSet: List[Double] = List.empty[Double]
+  // BJKST Sketch class: stores the k smallest normalized hash values.
+  class BJKSTSketch(val bucketSize: Int) extends Serializable {
+    // minSet holds the smallest normalized hash values (each in [0, 1)).
+    var minSet: List[Double] = List.empty[Double]
 
-  // Add an element using the provided hash function.
-  def add(s: String, h: hash_function): Unit = {
-    val r = h.hash(s).toDouble / h.p.toDouble  // Normalize to [0,1).
-    minSet = (r :: minSet).sorted.take(bucketSize)
+    // Add an element using the provided hash function.
+    def add(s: String, h: hash_function): Unit = {
+      val r = h.hash(s).toDouble / h.p.toDouble  // Normalize to [0,1).
+      // Insert r and keep only the smallest bucketSize values.
+      minSet = (r :: minSet).sorted.take(bucketSize)
+    }
+
+    // Merge with another sketch.
+    def merge(that: BJKSTSketch): BJKSTSketch = {
+      val merged = new BJKSTSketch(bucketSize)
+      merged.minSet = (this.minSet ++ that.minSet).sorted.take(bucketSize)
+      merged
+    }
+
+    // Estimate the number of distinct elements.
+    def estimate(): Double = {
+      if (minSet.size < bucketSize || minSet.isEmpty) 0.0
+      else bucketSize / minSet.last
+    }
   }
 
-  def merge(that: BJKSTSketch): BJKSTSketch = {
-    val merged = new BJKSTSketch(bucketSize)
-    merged.minSet = (this.minSet ++ that.minSet).sorted.take(bucketSize)
-    merged
-  }
-
-  def estimate(): Double = {
-    if (minSet.size < bucketSize || minSet.isEmpty) 0.0
-    else bucketSize / minSet.last
-  }
-}
-
-  def computeTrialEstimate(x: RDD[String], width: Int): Double = {
-  println("Starting computeTrialEstimate")  // Debugging line
+def computeTrialEstimate(x: RDD[String], width: Int): Double = {
   val h = new hash_function(2147483587)
-  val zero: List[Double] = List.empty[Double]
-  
-  // seqOp to compute the hash value for each string and maintain the smallest values in minSet
-  def seqOp(acc: List[Double], s: String): List[Double] = {
-    val r = h.hash(s).toDouble / h.p.toDouble
-    (r :: acc).sorted.take(width)
-  }
-  
-  // combOp to merge the results from different partitions
-  def combOp(acc1: List[Double], acc2: List[Double]): List[Double] = {
-    (acc1 ++ acc2).sorted.take(width)
-  }
-  
-  // Aggregate the results to compute the final minSet
-  val minSet = x.aggregate(zero)(seqOp, combOp)
+  val smallest = x
+    .map(s => h.hash(s).toDouble / h.p.toDouble)
+    .takeOrdered(width)
 
-  if (minSet.size < width || minSet.isEmpty) {
-    println("minSet is empty or too small, returning 0.0")  // Debugging line
-    return 0.0
-  }
-
-  width / minSet.last
+  if (smallest.length < width) 0.0
+  else width.toDouble / smallest.last
 }
 
- def BJKST(x: RDD[String], width: Int, trials: Int): Double = {
-  println("Starting BJKST")  // Debugging line to confirm the function is called
+def BJKST(x: RDD[String], width: Int, trials: Int): Double = {
+  val estimates = (1 to trials)
+    .map(_ => computeTrialEstimate(x, width))
+    .filter(_ > 0)
+    .sorted
 
-  val estimates = (1 to trials).map { _ =>
-    val estimate = computeTrialEstimate(x, width)
-    println(s"Trial estimate: $estimate")  // Debugging line: Print trial estimates
-    estimate
-  }.filter(_ > 0).toList
-
-  if (estimates.isEmpty) {
-    println("No valid estimates generated. Returning 0.0.")  // Debugging line
-    0.0
-  } else {
-    val sortedEstimates = estimates.sorted
-    val n = sortedEstimates.size
-    if (n % 2 == 1) sortedEstimates(n / 2)
-    else (sortedEstimates(n / 2 - 1) + sortedEstimates(n / 2)) / 2.0
+  if (estimates.isEmpty) 0.0
+  else {
+    val mid = estimates.size / 2
+    if (estimates.size % 2 == 1) estimates(mid)
+    else (estimates(mid - 1) + estimates(mid)) / 2.0
   }
 }
 
